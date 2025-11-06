@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Products — Swathi Textiles</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /* --- Improved product card design --- */
+    .products-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .product-card {
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      border-bottom: 1px solid #eee;
+    }
+
+    .product-card .info {
+      padding: 15px;
+      text-align: center;
+      flex-grow: 1;
+    }
+
+    .product-card h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: #222;
+      font-weight: bold;
+    }
+
+    .product-card p {
+      font-size: 15px;
+      color: #444;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .card-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: auto;
+      flex-wrap: wrap;
+    }
+
+    .card-actions button {
+      background-color: #ff4081;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .card-actions button:hover {
+      background-color: #e91e63;
+    }
+
+    .buy-now {
+      background-color: #4CAF50 !important;
+    }
+
+    .buy-now:hover {
+      background-color: #43a047 !important;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="brand"><a href="index.html">Swathi Textiles</a></div>
+    <div class="search-wrap">
+      <input id="pageSearch" type="search" placeholder="Search products..." />
+      <button id="pageSearchBtn">Search</button>
+    </div>
+    <nav class="top-nav">
+      <a href="cart.html">Cart <span id="cartCount" class="badge">0</span></a>
+      <a href="orders.html">My Orders</a>
+    </nav>
+  </header>
+
+  <main class="container page-products">
+    <div class="left-col">
+      <h2 id="categoryTitle">Products</h2>
+
+      <div class="filters">
+        <label>Sort:
+          <select id="sortSelect">
+            <option value="popular">Popular</option>
+            <option value="low">Price: Low → High</option>
+            <option value="high">Price: High → Low</option>
+          </select>
+        </label>
+
+        <label>Price:
+          <select id="priceFilter">
+            <option value="all">All</option>
+            <option value="0-499">Under ₹500</option>
+            <option value="500-999">₹500 - ₹999</option>
+            <option value="1000-999999">₹1000+</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="productContainer" class="products-container"></div>
+    </div>
+
+    <aside class="right-col">
+      <div class="sticky-box">
+        <h3>Quick Cart</h3>
+        <div id="quickCart"></div>
+        <a href="cart.html" class="checkout-quick">Go to Cart</a>
+      </div>
+    </aside>
+  </main>
+
+  <footer>© 2025 Swathi Textiles</footer>
+
+  <script src="app.js"></script>
+  <script src="products.js"></script>
+
+  <script>
+    console.log("✅ products.html loaded");
+
+    const params = new URLSearchParams(window.location.search);
+    const category = params.get('category');
+    const searchQ = params.get('search');
+
+    document.getElementById('cartCount').textContent = app.getCart().length;
+
+    const title = document.getElementById('categoryTitle');
+    title.textContent = searchQ ? `Search: "${searchQ}"` : (category ? category.charAt(0).toUpperCase()+category.slice(1) : 'All Products');
+
+    const container = document.getElementById('productContainer');
+
+    // Build product list dynamically
+    const products = [];
+    for (const cat in productNames) {
+      const names = productNames[cat];
+      names.forEach((n, i) => {
+        products.push({
+          id: `${cat}_${i+1}`,
+          category: cat,
+          name: n,
+          price: 499 + (i * 100),
+          image: `images/${cat}/${cat}_${i+1}.jpg`
+        });
+      });
+    }
+
+    let filtered = products;
+    if (category) filtered = products.filter(p => p.category === category);
+    if (searchQ) {
+      const q = searchQ.toLowerCase();
+      filtered = filtered.filter(p => p.name.toLowerCase().includes(q));
+      document.getElementById('pageSearch').value = searchQ;
+    }
+
+    function render(list) {
+      container.innerHTML = '';
+      if (!list.length) {
+        container.innerHTML = '<p style="text-align:center;color:#777;">No products found.</p>';
+        return;
+      }
+      list.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <img src="${p.image}" alt="${p.name}">
+          <div class="info">
+            <h3>${p.name}</h3>
+            <p>₹${p.price}</p>
+            <div class="card-actions">
+              <button onclick="app.addToCartById('${p.id}')">Add to Cart</button>
+              <button class="buy-now" onclick="buyNow('${p.id}')">Buy Now</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function buyNow(id) {
+      app.addToCartById(id);
+      window.location.href = "cart.html";
+    }
+
+    render(filtered);
+
+    // Sort
+    document.getElementById('sortSelect').addEventListener('change', (e) => {
+      const v = e.target.value;
+      let arr = [...filtered];
+      if (v === 'low') arr.sort((a,b)=>a.price-b.price);
+      else if (v === 'high') arr.sort((a,b)=>b.price-a.price);
+      render(arr);
+    });
+
+    // Price Filter
+    document.getElementById('priceFilter').addEventListener('change', (e) => {
+      const v = e.target.value;
+      const arr = filtered.filter(p=>{
+        if (v==='all') return true;
+        const [min,max] = v.split('-').map(Number);
+        return p.price >= min && p.price <= max;
+      });
+      render(arr);
+    });
+
+    // Search
+    document.getElementById('pageSearchBtn').addEventListener('click', () => {
+      const q = document.getElementById('pageSearch').value.trim();
+      if (!q) return alert('Type a search keyword');
+      window.location.href = `products.html?search=${encodeURIComponent(q)}`;
+    });
+
+    // Quick cart update
+    app.renderQuickCart('quickCart');
+    app.updateCartCount();
+  </script>
+</body>
+</html>

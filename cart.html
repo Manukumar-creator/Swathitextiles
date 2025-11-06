@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Cart | Swathi Textiles</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header class="navbar">
+  <div class="logo" onclick="window.location.href='index.html'">SWATHI TEXTILES</div>
+</header>
+
+<section class="section">
+  <h2>Your Shopping Cart</h2>
+  <div id="cartItems"></div>
+  <h3 id="totalPrice"></h3>
+  <button class="buy-btn" onclick="checkout()">Proceed to Checkout</button>
+</section>
+
+<footer>
+  <p>&copy; 2025 Swathi Textiles. All Rights Reserved.</p>
+</footer>
+
+<script>
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+  function renderCart() {
+    const cartDiv = document.getElementById("cartItems");
+    cartDiv.innerHTML = "";
+
+    if (cart.length === 0) {
+      cartDiv.innerHTML = "<p>Your cart is empty.</p>";
+      document.getElementById("totalPrice").innerText = "";
+      return;
+    }
+
+    let total = 0;
+    cart.forEach((item, index) => {
+      const price = parseFloat(item.price.replace("$", ""));
+      total += price * item.quantity;
+
+      cartDiv.innerHTML += `
+        <div class="product" style="text-align:left;">
+          <img src="${item.img}" width="100">
+          <h4>${item.name} (${item.size})</h4>
+          <p>${item.price}</p>
+          <input type="number" value="${item.quantity}" min="1" onchange="updateQty(${index}, this.value)">
+          <button class="cart-btn" onclick="removeItem(${index})">Remove</button>
+        </div>
+      `;
+    });
+
+    document.getElementById("totalPrice").innerText = `Total: $${total.toFixed(2)}`;
+  }
+
+  function updateQty(index, qty) {
+    cart[index].quantity = parseInt(qty);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    renderCart();
+  }
+
+  function removeItem(index) {
+    cart.splice(index, 1);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    renderCart();
+  }
+
+  function checkout() {
+    window.location.href = "checkout.html";
+  }
+
+  renderCart();
+</script>
+</body>
+</html>

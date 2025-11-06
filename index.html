@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Swathi Textiles — Home</title>
+  
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">Swathi Textiles<br></div>
+    <div class="shop-address">T-Begur (VSSSN Building), Nelamangala</div>
+
+    <div class="search-wrap">
+      <input id="globalSearch" type="search" placeholder="Search products, categories..." />
+      <button id="searchBtn">Search</button>
+    </div>
+    <nav class="top-nav">
+      <a href="cart.html">Cart <span id="cartCount" class="badge">0</span></a>
+      <a href="orders.html">My Orders</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="hero-left">
+        <h1>Discover Your Style</h1>
+        <p>Collections with great deals — shop now!</p>
+        <a class="cta" href="products.html?category=sarees">Shop Sarees</a>
+      </div>
+      <div class="hero-image">
+        <img src="images/sarees/sarees_1.jpg" alt="Sarees banner" />
+      </div>
+    </section>
+
+    <section class="categories">
+      <h2>Shop by Category</h2>
+      <div id="categoryGrid" class="category-grid"></div>
+    </section>
+
+    <section class="featured">
+      <h2>Trending Products</h2>
+      <div id="featuredProducts" class="products-container"></div>
+    </section>
+  </main>
+
+  <footer>
+    © 2025 Swathi Textiles. All Rights Reserved.
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    // Initialize homepage: build categories and some featured products
+    const categories = app.getCategories();
+    const grid = document.getElementById('categoryGrid');
+
+    categories.forEach(cat => {
+      const a = document.createElement('a');
+      a.className = 'category-card';
+      a.href = `products.html?category=${encodeURIComponent(cat)}`;
+      a.innerHTML = `
+        <img src="images/${cat}/${cat}_1.jpg" alt="${cat}" />
+        <h4>${cat.charAt(0).toUpperCase() + cat.slice(1)}</h4>
+      `;
+      grid.appendChild(a);
+    });
+
+    // Show a few featured items (mix of categories)
+    const featured = document.getElementById('featuredProducts');
+    const list = app.buildProductsArray(); // all products
+    // pick 8 random
+    const pick = [];
+    while (pick.length < 8 && pick.length < list.length) {
+      const r = list[Math.floor(Math.random()*list.length)];
+      if (!pick.find(p=>p.id===r.id)) pick.push(r);
+    }
+    pick.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.innerHTML = `
+        <img src="${p.image}" alt="${p.name}">
+        <div class="info">
+          <h3>${p.name}</h3>
+          <p>₹${p.price}</p>
+          <button onclick="app.addToCartById('${p.id}')">Add to Cart</button>
+        </div>
+      `;
+      featured.appendChild(card);
+    });
+
+    // search
+    document.getElementById('searchBtn').addEventListener('click', () => {
+      const q = document.getElementById('globalSearch').value.trim();
+      if (!q) return alert('Type a keyword to search');
+      // store search query and go to products page (products.html will read search param)
+      window.location.href = `products.html?search=${encodeURIComponent(q)}`;
+    });
+
+    // update cart count
+    app.updateCartCount();
+  </script>
+</body>
+</html>

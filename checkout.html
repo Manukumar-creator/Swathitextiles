@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirm Your Order - Swathi Textiles</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: #fafafa;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      width: 100%;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header h1 { color: #e91e63; margin: 0; }
+    nav a { margin: 0 10px; text-decoration: none; color: #333; font-weight: 500; }
+    nav a:hover { color: #e91e63; }
+
+    h2 { text-align: center; margin-top: 25px; }
+
+    .order-container {
+      background: #fff;
+      max-width: 500px;
+      width: 90%;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      margin-top: 25px;
+    }
+
+    .order-form input, .order-form textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .confirm-btn {
+      width: 100%;
+      background: #e91e63;
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .confirm-btn:hover { background: #d81b60; }
+
+    .success-message {
+      background: #e7ffe7;
+      border: 1px solid #b3e6b3;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.1rem;
+      color: #2b7a2b;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+
+    footer {
+      text-align: center;
+      margin-top: 25px;
+      padding: 15px;
+      color: #666;
+      background: #fff;
+      width: 100%;
+      border-top: 1px solid #eee;
+    }
+
+    @media (max-width:600px){
+      .order-container{width:95%;padding:20px;}
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Swathi Textiles</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="orders.html">My Orders</a>
+    </nav>
+  </header>
+
+  <h2>Confirm Your Order</h2>
+
+  <div class="order-container">
+    <div class="order-form">
+      <h3>Delivery Details</h3>
+      <input type="text" id="name" placeholder="Full Name" required>
+      <input type="text" id="mobile" placeholder="Mobile Number" required>
+      <textarea id="address" rows="3" placeholder="Delivery Address" required></textarea>
+
+      <h3>Payment Method</h3>
+      <label><input type="radio" name="payment" value="Cash on Delivery" checked> Cash on Delivery</label><br>
+      <label><input type="radio" name="payment" value="Online Payment"> Online Payment</label><br><br>
+
+      <button class="confirm-btn" onclick="confirmOrder()">Place Order</button>
+    </div>
+
+    <div id="successMsg" class="success-message" style="display:none;">
+      ✅ Your order has been successfully placed!<br>
+      Redirecting to “My Orders” page...
+    </div>
+  </div>
+
+  <footer>© 2025 Swathi Textiles. All Rights Reserved.</footer>
+
+  <script>
+    function confirmOrder() {
+      const name = document.getElementById("name").value.trim();
+      const mobile = document.getElementById("mobile").value.trim();
+      const address = document.getElementById("address").value.trim();
+      const payment = document.querySelector('input[name="payment"]:checked').value;
+
+      if (!name || !mobile || !address) {
+        alert("Please fill all delivery details!");
+        return;
+      }
+
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      if (cart.length === 0) {
+        alert("Your cart is empty!");
+        return;
+      }
+
+      const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      const orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+      const newOrder = {
+        date: new Date().toLocaleString(),
+        items: cart,
+        total,
+        name,
+        mobile,
+        address,
+        payment
+      };
+
+      orders.push(newOrder);
+      localStorage.setItem("orders", JSON.stringify(orders));
+      localStorage.removeItem("cart");
+
+      document.querySelector(".order-form").style.display = "none";
+      const successMsg = document.getElementById("successMsg");
+      successMsg.style.display = "block";
+
+      // redirect after 2s
+      setTimeout(() => {
+        window.location.href = "thankyou.html";
+      }, 2000);
+    }
+  </script>
+
+</body>
+</html>

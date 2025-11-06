@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Product Details — Swathi Textiles</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand"><a href="index.html">Swathi Textiles</a></div>
+    <nav class="top-nav">
+      <a href="cart.html">Cart <span id="cartCount" class="badge">0</span></a>
+      <a href="orders.html">My Orders</a>
+    </nav>
+  </header>
+
+  <main class="container product-page">
+    <div class="product-main" id="productDetails"></div>
+
+    <section class="similar-section">
+      <h3>Similar Products</h3>
+      <div id="similarContainer" class="similar-row"></div>
+    </section>
+  </main>
+
+  <footer>© 2025 Swathi Textiles</footer>
+
+  <script src="app.js"></script>
+  <script>
+    app.updateCartCount();
+
+    // we expect ?id=category_index  (we encode this id when creating products)
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    const products = app.buildProductsArray();
+    const product = products.find(p => p.id === id);
+
+    const container = document.getElementById('productDetails');
+    const similarContainer = document.getElementById('similarContainer');
+
+    if (!product) {
+      container.innerHTML = `<p style="text-align:center;color:#777;">Product not found.</p>`;
+    } else {
+      container.innerHTML = `
+        <div class="product-left">
+          <img id="mainProductImage" src="${product.image}" alt="${product.name}" />
+        </div>
+        <div class="product-right">
+          <h2>${product.name}</h2>
+          <p class="price">₹${product.price}</p>
+          <p class="desc">Beautiful ${product.category} with premium quality fabric. (Sample product description)</p>
+          <div class="action-row">
+            <button onclick="app.addToCartById('${product.id}')">Add to Cart</button>
+            <button onclick="app.addToCartById('${product.id}'); window.location.href='cart.html'">Buy Now</button>
+          </div>
+        </div>
+      `;
+      // similar: other items in same category
+      const similar = products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 12);
+      similar.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'similar-item';
+        div.innerHTML = `
+          <img src="${s.image}" alt="${s.name}" />
+          <p>${s.name}</p>
+          <small>₹${s.price}</small>
+        `;
+        div.addEventListener('click', () => {
+          // update URL and content without full reload
+          history.pushState({}, '', `product-details.html?id=${s.id}`);
+          // render new product
+          location.reload(); // simple approach to update content and keep code small
+        });
+        similarContainer.appendChild(div);
+      });
+    }
+
+  </script>
+</body>
+</html>
